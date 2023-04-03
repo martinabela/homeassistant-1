@@ -1,0 +1,44 @@
+blueprint:
+  name: "Turn on/off switch1 based on switch0 state"
+  description: "Automatically turn on switch1 if switch0 is on for 5 minutes, and turn off switch1 5 minutes after switch0 turns off."
+  domain: automation
+  input:
+    switch0_entity:
+      name: "Switch0 entity"
+      description: "The entity to monitor for on/off state changes."
+      selector:
+        entity:
+          domain: switch
+    switch1_entity:
+      name: "Switch1 entity"
+      description: "The entity to turn on/off based on the state of switch0."
+      selector:
+        entity:
+          domain: switch
+
+  trigger:
+    platform: state
+    entity_id: !input switch0_entity
+  action:
+    choose:
+      # If switch0 turns on
+      - conditions:
+          - condition: state
+            entity_id: !input switch0_entity
+            state: "on"
+            for:
+              minutes: 5
+        sequence:
+          - service: switch.turn_on
+            entity_id: !input switch1_entity
+
+      # If switch0 turns off
+      - conditions:
+          - condition: state
+            entity_id: !input switch0_entity
+            state: "off"
+            for:
+              minutes: 5
+        sequence:
+          - service: switch.turn_off
+            entity_id: !input switch1_entity
